@@ -19,6 +19,6 @@ jobs:
           TAG=${GITHUB_REF/refs\/tags\//}
           VERSION=''
           PREFIX=${TAG_VERSION:0:1}
-          $echo PREFFIX
+          $echo $PREFFIX
           if [ "${PREFIX}" == "v" ]; then VERSION="${TAG:1}"; else VERSION="${TAG:0}"; fi
           echo $VERSION
