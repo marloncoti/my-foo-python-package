@@ -11,9 +11,9 @@ jobs:
       - uses: octokit/request-action@v2.x
         id: get_latest_release
         with:
-          route: GET /repos/marloncoti/my-foo-python-package/releases/latest
+          route: GET /repos/marloncoti/my-foo-python-package/releases
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
       - run: | 
-          TAG=`echo ${{ fromJson (steps.get_latest_release.outputs.data).tag_name }}`
+          TAG=`echo ${{ fromJson (steps.get_latest_release.outputs.data).[0].tag_name }}`
           echo $TAG
