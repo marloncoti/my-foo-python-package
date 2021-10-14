@@ -14,4 +14,4 @@ jobs:
           route: GET /repos/marloncoti/my-foo-python-package/releases/latest
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
-      - run: "echo latest release: ${{ steps.get_latest_release.outputs.data }}"
+      - run: "echo latest release: ${{ steps.get_latest_release.outputs.data.tag_name }}"
