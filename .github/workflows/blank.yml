@@ -5,15 +5,47 @@ on:
       - main
 
 jobs:
-  logLatestRelease:
+  build-python-package:
     runs-on: ubuntu-latest
     steps:
-      - uses: octokit/request-action@v2.x
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      
+      - name: GET LASTEST RELEASE TAG
+        uses: octokit/request-action@v2.x
         id: get_latest_release
         with:
           route: GET /repos/healthcarecom/platform-infrastructure-constructs-library/releases
+          owner: healthcarecom
+          repo:
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-      - run: | 
-          TAG=`echo ${{ fromJson (steps.get_latest_release.outputs.data).tag_name }}`
-          echo $TAG
+          GITHUB_TOKEN: ${{ secrets.CICD_GITHUB_TOKEN  }}
+
+      - uses: actions/checkout@v2
+        with:
+          repository: healthcarecom/platform-github-actions
+          token: ${{ secrets.CICD_GITHUB_TOKEN }}
+          path: .github/actions
+
+      - name: update setup tools 
+        run: |
+          pip install --upgrade pip setuptools wheel build
+
+      - name: Build python package
+        id: build-package
+        run: | 
+          TAG_NAME=`echo ${{ fromJson (steps.get_latest_release.outputs.data)[0].tag_name }}`
+          TAG=''
+          PREFIX=''
+          BASE_VERSION=''
+          VERSION=''
+          DATE=`echo $(date +%Y%m%d)`
+
+          if [ -z "$TAG_NAME" ]; then TAG="0.0.1"; else TAG=${TAG_NAME}; fi
+          PREFIX=${TAG:0:1}
+          if [ "${PREFIX,,}" == "v" ]; then BASE_VERSION="${TAG:1}"; else BASE_VERSION="${TAG:0}"; fi
+          VERSION="${BASE_VERSION}.dev${DATE}"
+          echo $VERSION 
