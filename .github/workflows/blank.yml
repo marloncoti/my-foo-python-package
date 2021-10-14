@@ -12,8 +12,6 @@ jobs:
         id: get_latest_release
         with:
           route: GET /repos/marloncoti/my-foo-python-package/releases/latest
-          owner: marloncoti
-          repo: my-foo-python-package
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
       - run: "echo latest release: ${{ steps.get_latest_release.outputs.data }}"
