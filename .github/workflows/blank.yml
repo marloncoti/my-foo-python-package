@@ -11,7 +11,7 @@ jobs:
       - uses: octokit/request-action@v2.x
         id: get_latest_release
         with:
-          route: GET /repos/{owner}/{repo}/releases/latest
+          route: GET /repos/marloncoti/my-foo-python-package/releases/latest
           owner: marloncoti
           repo: my-foo-python-package
         env:
