@@ -22,7 +22,7 @@ jobs:
           owner: healthcarecom
           repo:
         env:
-          GITHUB_TOKEN: ${{ secrets.CICD_GITHUB_TOKEN  }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN  }}
 
       - uses: actions/checkout@v2
         with:
