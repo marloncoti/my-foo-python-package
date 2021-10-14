@@ -15,5 +15,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
       - run: | 
-          TAG=`echo ${{ fromJson (steps.get_latest_release.outputs.data)[0].tag_name }}`
+          TAG=`echo ${{ fromJson (steps.get_latest_release.outputs.data)[30].tag_name }}`
           echo $TAG
