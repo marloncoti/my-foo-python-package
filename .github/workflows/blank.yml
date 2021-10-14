@@ -16,6 +16,8 @@ jobs:
         run: echo Hello, world!
       - name: Run a multi-line script
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project. 
-          echo ${GITHUB_REF/refs\/tags\//}
+          TAG=${GITHUB_REF/refs\/tags\//}
+          VERSION=''
+          PREFIX=${TAG_VERSION:0:1}
+          if [ "${PREFIX,,}" == "v" ]; then VERSION="${TAG:1}"; else VERSION="${TAG:0}"; fi
+          echo $VERSION
