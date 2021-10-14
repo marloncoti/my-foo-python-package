@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           repository: healthcarecom/platform-github-actions
-          token: ${{ secrets.CICD_GITHUB_TOKEN }}
+          token: ${{ secrets.TOKEN }}
           path: .github/actions
 
       - name: update setup tools 
