@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           repository: healthcarecom/platform-github-actions
-          token: ${{ secrets.CICD_GITHUB_TOKEN }}
+          token: ${{ secrets.TOKEN }}
           path: .github/actions
  
       - name: GET LASTEST RELEASE TAG
@@ -38,7 +38,7 @@ jobs:
           route: GET /repos/${{github.repository}}/releases
 
         env:
-          GITHUB_TOKEN: ${{ secrets.CICD_GITHUB_TOKEN  }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN  }}
 
       - name: update setup tools 
         run: |
