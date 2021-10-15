@@ -35,7 +35,7 @@ jobs:
         uses: octokit/request-action@v2.x
         id: get_latest_release
         with:
-          route: GET /repos/healthcarecom/platform-infrastructure-constructs-library/releases
+          route: GET /repos/${{github.repository}}/releases
 
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN  }}
@@ -43,25 +43,27 @@ jobs:
       - name: update setup tools 
         run: |
           pip install --upgrade pip setuptools wheel build
-
-      - name: Build python package
-        id: build-package
-        run: | 
+        
+      - name: Package Version
+        id: package-version
+        run: |
           TAG_NAME=`echo ${{ fromJson (steps.get_latest_release.outputs.data)[0].tag_name }}`
           TAG=''
           PREFIX=''
           BASE_VERSION=''
           VERSION=''
           DATE=`echo $(date +%Y%m%d)`
-
           if [ -z "$TAG_NAME" ]; then TAG="0.0.1"; else TAG=${TAG_NAME}; fi
           PREFIX=${TAG:0:1}
           if [ "${PREFIX,,}" == "v" ]; then BASE_VERSION="${TAG:1}"; else BASE_VERSION="${TAG:0}"; fi
           VERSION="${BASE_VERSION}.dev${DATE}"
-          echo $VERSION > VERSION
+          echo "::set-output name=version::$VERSION"
 
+      - name: Build python package
+        id: build-package
+        run: | 
+          echo ${{steps.package-version.version}} > VERSION
           python -m build
-
           PACKAGE_NAME=`ls dist  | grep whl` 
           echo "::set-output name=package::$PACKAGE_NAME"
 
