@@ -1,0 +1,59 @@
+name: publish-release-package
+
+on:
+  release:
+    types: [created]
+
+env:
+  PROJECT_NAME: platform-iac-constructs-library
+  PROJECT_NAME_PRETTY: Engineering Platform - Infrastructure as Code Constructs Library
+  FEED_NAME: engineering-platform
+  ENV: prd
+
+jobs:
+  build-python-package: 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      
+      - uses: actions/checkout@v2
+        with:
+          repository: healthcarecom/platform-github-actions
+          token: ${{ secrets.TOKEN }}
+          path: .github/actions
+
+      - name: update setup tools 
+        run: |
+          pip install --upgrade pip setuptools wheel build
+
+      - name: Build python package
+        id: build-package
+        run: | 
+          TAG=${GITHUB_REF/refs\/tags\//}
+          VERSION=''
+          PREFIX=${TAG:0:1}
+          if [ "${PREFIX,,}" == "v" ]; then VERSION="${TAG:1}"; else VERSION="${TAG:0}"; fi
+          echo $VERSION > VERSION
+
+          python -m build
+          PACKAGE_NAME=`ls dist  | grep whl` 
+          echo "::set-output name=package::$PACKAGE_NAME"
+
+      - name: upload package to MYGET
+        env: 
+          MYGET_TOKEN: ${{ secrets.TOKEN }}
+          PACKAGE: ${{ steps.build-package.outputs.package}}
+        run: |
+          cd dist
+          echo "curl -k -X POST https://myget.org/F/$FEED_NAME/python/upload -H "Authorization: Bearer ${MYGET_TOKEN}" -F "data=@$PACKAGE""
+          #curl -k -X POST https://myget.org/F/$FEED_NAME/python/upload -H "Authorization: Bearer ${MYGET_TOKEN}" -F "data=@$PACKAGE"
+
+
+
+
+
+        

@@ -1,0 +1,79 @@
+name: publish-snapshot-package
+
+on:
+  workflow_run:
+    workflows: ["test-coverage"]
+    branches: [develop]
+    types: 
+      - completed
+  push:
+    branches: [develop]
+
+env:
+  PROJECT_NAME: platform-iac-constructs-library
+  PROJECT_NAME_PRETTY: Engineering Platform - Infrastructure as Code Constructs Library - Development Version
+  FEED_NAME: engineering-platform
+  ENV: stg
+
+jobs:
+  build-python-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - uses: actions/checkout@v2
+        with:
+          repository: healthcarecom/platform-github-actions
+          token: ${{ secrets.CICD_GITHUB_TOKEN }}
+          path: .github/actions
+ 
+      - name: GET LASTEST RELEASE TAG
+        uses: octokit/request-action@v2.x
+        id: get_latest_release
+        with:
+          route: GET /repos/${{github.repository}}/releases
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.CICD_GITHUB_TOKEN  }}
+
+      - name: update setup tools 
+        run: |
+          pip install --upgrade pip setuptools wheel build
+
+      - name: Build python package
+        id: build-package
+        run: | 
+          TAG_NAME=`echo ${{ fromJson (steps.get_latest_release.outputs.data)[0].tag_name }}`
+          TAG=''
+          PREFIX=''
+          BASE_VERSION=''
+          VERSION=''
+          DATE=`echo $(date +%Y%m%d)`
+
+          if [ -z "$TAG_NAME" ]; then TAG="0.0.1"; else TAG=${TAG_NAME}; fi
+          PREFIX=${TAG:0:1}
+          if [ "${PREFIX,,}" == "v" ]; then BASE_VERSION="${TAG:1}"; else BASE_VERSION="${TAG:0}"; fi
+          VERSION="${BASE_VERSION}.dev${DATE}"
+          echo $VERSION > VERSION
+
+          python -m build
+
+          PACKAGE_NAME=`ls dist  | grep whl` 
+          echo "::set-output name=package::$PACKAGE_NAME"
+
+      - name: upload package to MYGET
+        env: 
+          MYGET_TOKEN: ${{ secrets.MYGET_AUTH_TOKEN }}
+          PACKAGE: ${{ steps.build-package.outputs.package}}
+        run: |
+          cd dist
+          echo "curl -k -X POST https://myget.org/F/$FEED_NAME/python/upload -H "Authorization: Bearer ${MYGET_TOKEN}" -F "data=@$PACKAGE""
+          #curl -k -X POST https://myget.org/F/$FEED_NAME/python/upload -H "Authorization: Bearer ${MYGET_TOKEN}" -F "data=@$PACKAGE"
+
+
+
+
