@@ -3,10 +3,16 @@ import setuptools
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+def get_version():
+    try:
+        with open('VERSION', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        return "0.0.1-dev"
 
 setuptools.setup(
     name = "mcoti_package",
-    version = "0.0.1",
+    version = get_version().rstrip(),
     author = "mcoti",
     author_email = "mcoti@gmail.com",
     description = "A small example package",
