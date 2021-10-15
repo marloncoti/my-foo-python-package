@@ -29,20 +29,24 @@ jobs:
       - name: update setup tools 
         run: |
           pip install --upgrade pip setuptools wheel build
-
-      - name: Build python package
-        id: build-package
-        run: | 
+      
+      - name: Package Version
+        id: package-version
+        run: |
           TAG=${GITHUB_REF/refs\/tags\//}
           VERSION=''
           PREFIX=${TAG:0:1}
           if [ "${PREFIX,,}" == "v" ]; then VERSION="${TAG:1}"; else VERSION="${TAG:0}"; fi
-          echo $VERSION > VERSION
+          echo "::set-output name=version::$VERSION"
 
+      - name: Build python package
+        id: build-package
+        run: | 
+          echo ${{steps.package-version.outputs.version}} > VERSION
           python -m build
           PACKAGE_NAME=`ls dist  | grep whl` 
           echo "::set-output name=package::$PACKAGE_NAME"
-
+      
       - name: upload package to MYGET
         env: 
           MYGET_TOKEN: ${{ secrets.TOKEN }}
