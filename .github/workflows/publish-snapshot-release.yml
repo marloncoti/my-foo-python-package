@@ -31,7 +31,7 @@ jobs:
           token: ${{ secrets.TOKEN }}
           path: .github/actions
  
-      - name: GET LASTEST RELEASE TAG
+      - name: Get Latest TAG
         uses: octokit/request-action@v2.x
         id: get_latest_release
         with:
@@ -62,7 +62,7 @@ jobs:
       - name: Build python package
         id: build-package
         run: | 
-          echo ${{steps.package-version.version}} > VERSION
+          echo ${{steps.package-version.outputs.version}} > VERSION
           python -m build
           PACKAGE_NAME=`ls dist  | grep whl` 
           echo "::set-output name=package::$PACKAGE_NAME"
